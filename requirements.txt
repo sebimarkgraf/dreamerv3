@@ -9,3 +9,4 @@ rich
 ruamel.yaml
 tensorflow-cpu
 tensorflow_probability
+-e git+ssh://git@github.com/sebimarkgraf/gym-distractions.git#egg=gym_distractions

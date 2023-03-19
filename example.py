@@ -18,7 +18,7 @@ def main():
       'decoder.mlp_keys': '$^',
       'encoder.cnn_keys': 'image',
       'decoder.cnn_keys': 'image',
-      # 'jax.platform': 'cpu',
+      'jax.platform': 'cpu',
   })
   config = embodied.Flags(config).parse()
 
@@ -32,9 +32,18 @@ def main():
       # embodied.logger.MLFlowOutput(logdir.name),
   ])
 
+  import gym_distractions
   import crafter
   from embodied.envs import from_gym
-  env = crafter.Env()  # Replace this with your Gym env.
+  env = gym_distractions.make(
+    domain_name="cartpole",
+    task_name="swingup",
+    height=64,
+    width=64,
+    distraction_source="dots_linear",
+    distraction_location="background",
+    channels_first=False
+  )  # Replace this with your Gym env.
   env = from_gym.FromGym(env, obs_key='image')  # Or obs_key='vector'.
   env = dreamerv3.wrap_env(env, config)
   env = embodied.BatchEnv([env], parallel=False)
