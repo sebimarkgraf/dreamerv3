@@ -1,8 +1,18 @@
-def main():
+import gym_distractions
+from dreamerv3.embodied.envs import from_gym
+import warnings
+import dreamerv3
+from dreamerv3 import embodied
+from gymnasium.wrappers import StepAPICompatibility
 
-  import warnings
-  import dreamerv3
-  from dreamerv3 import embodied
+
+def main():
+  domain = "cartpole"
+  task = "swingup"
+  distraction = "dots_linear"
+  seed = 1
+
+  run_name = f"{domain}-{task}-{distraction}-{seed}"
   warnings.filterwarnings('ignore', '.*truncated to dtype int32.*')
 
   # See configs.yaml for all options.
@@ -26,24 +36,27 @@ def main():
   step = embodied.Counter()
   logger = embodied.Logger(step, [
       embodied.logger.TerminalOutput(),
-      embodied.logger.JSONLOutput(logdir, 'metrics.jsonl'),
-      embodied.logger.TensorBoardOutput(logdir),
-      # embodied.logger.WandBOutput(logdir.name, config),
+      # embodied.logger.JSONLOutput(logdir, 'metrics.jsonl'),
+      # embodied.logger.TensorBoardOutput(logdir),
+      embodied.logger.WandBOutput(name=run_name, config={**config, 'experiment': {
+          'task': f"{domain}-{task}",
+          'distraction': distraction,
+          'seed': seed
+      }}),
       # embodied.logger.MLFlowOutput(logdir.name),
   ])
 
-  import gym_distractions
-  import crafter
-  from embodied.envs import from_gym
   env = gym_distractions.make(
-    domain_name="cartpole",
-    task_name="swingup",
+    domain_name=domain,
+    task_name=task,
     height=64,
     width=64,
-    distraction_source="dots_linear",
+    distraction_source=distraction,
     distraction_location="background",
+    from_pixels=True,
     channels_first=False
   )  # Replace this with your Gym env.
+  env = StepAPICompatibility(env, output_truncation_bool=False)
   env = from_gym.FromGym(env, obs_key='image')  # Or obs_key='vector'.
   env = dreamerv3.wrap_env(env, config)
   env = embodied.BatchEnv([env], parallel=False)

@@ -169,6 +169,7 @@ def make_env(config, **overrides):
       'minecraft': 'embodied.envs.minecraft:Minecraft',
       'loconav': 'embodied.envs.loconav:LocoNav',
       'pinpad': 'embodied.envs.pinpad:PinPad',
+      'gym_distractions': 'gym_distractions:make'
   }[suite]
   if isinstance(ctor, str):
     module, cls = ctor.split(':')
